@@ -2,11 +2,11 @@
 
 - name: Hostname | Update the hostname (pt. 1) - hostname cmd
   hostname:
-    name: "{{inventory_hostname_short}}"
+    name: "{% if inventory_hostname_extended is defined %}{{ inventory_hostname_extended }}{% else %}{{ inventory_hostname_short }}{% endif %}"
 
 - name: Hostname | Update the hostname (pt. 2) - (/etc/hostname)
   copy:
-    content: "{{inventory_hostname_short}}"
+    content: "{% if inventory_hostname_extended is defined %}{{ inventory_hostname_extended }}{% else %}{{ inventory_hostname_short }}{% endif %}"
     dest: /etc/hostname
     owner: root
     group: root
@@ -16,5 +16,5 @@
   lineinfile:
     dest: /etc/hosts
     regexp: "^127.0.0.1"
-    line: "127.0.0.1{{'\t'}}localhost{{'\t'}}{{inventory_hostname}}{% if inventory_hostname != inventory_hostname_short %}{{'\t'}}{{inventory_hostname_short}}{% endif %}"
+    line: "127.0.0.1{{'\t'}}localhost{{'\t'}}{{inventory_hostname}}{% if inventory_hostname_extended is defined %}{{'\t'}}{{inventory_hostname_extended}}{% else %}{% if inventory_hostname != inventory_hostname_short %}{{'\t'}}{{inventory_hostname_short}}{% endif %}{% endif %}"
     state: present
